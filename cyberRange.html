@@ -1,0 +1,599 @@
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Rajdhani:wght@400;600;700&family=Share+Tech+Mono&display=swap');
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#0a0e17;color:#c5c6c7;font-family:'Rajdhani',sans-serif}
+  #app{display:flex;min-height:100vh;background:linear-gradient(135deg,#0a0e17 0%,#111927 50%,#0d1117 100%)}
+  #sidebar{width:220px;min-width:220px;background:linear-gradient(180deg,#0a0015 0%,#120024 100%);border-right:1px solid #2d014d;display:flex;flex-direction:column;padding:16px 12px}
+  #main{flex:1;padding:20px;overflow:auto}
+  .brand{background:linear-gradient(135deg,#120024,#2d014d);border:1px solid #451a66;border-radius:8px;padding:14px;text-align:center;margin-bottom:16px}
+  .brand-title{font-family:'Orbitron',monospace;font-size:14px;color:#66fcf1;letter-spacing:3px;font-weight:900}
+  .brand-role{color:#c5c6c7;font-size:10px;letter-spacing:2px;margin-top:4px}
+  .nav-item{padding:10px 14px;border-radius:6px;cursor:pointer;font-size:13px;color:#c5c6c7;margin:2px 0;transition:background .2s}
+  .nav-item:hover{background:#2d014d}
+  .nav-item.active{background:#2d014d;color:#fff;font-weight:600;border-left:3px solid #7c3aed}
+  .nav-divider{border-top:1px solid #2d014d;margin:12px 0}
+  .logout-btn{background:linear-gradient(135deg,#120024,#2d014d);color:#c5c6c7;border:1px solid #451a66;border-radius:6px;padding:9px 14px;width:100%;cursor:pointer;font-family:'Rajdhani',sans-serif;font-size:13px;transition:all .2s;margin-top:auto}
+  .logout-btn:hover{background:linear-gradient(135deg,#2d014d,#3e016b);color:#fff}
+  .page{display:none}
+  .page.active{display:block}
+  h2,h3{color:#66fcf1;font-family:'Rajdhani',sans-serif;font-weight:600}
+  h2{font-size:22px;margin-bottom:4px}
+  h3{font-size:16px;margin-bottom:10px}
+  .vault-line{height:1px;background:linear-gradient(90deg,transparent,#66fcf1,transparent);margin:8px 0 18px}
+  .cyber-card{background:linear-gradient(145deg,#1a1f2e,#0d1117);border:1px solid #1e2d3d;border-radius:10px;padding:18px 20px;margin:8px 0}
+  .metrics-row{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:18px}
+  .metric-box{background:#1e1e1e;border:1px solid #333;border-radius:8px;padding:14px}
+  .threat-badge{padding:8px 14px;border-radius:5px;text-align:center;font-weight:700;font-size:13px;border:2px solid;margin-bottom:14px}
+  .sim-btn{background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;border:1px solid #7c3aed;border-radius:6px;padding:10px 16px;width:100%;cursor:pointer;font-family:'Orbitron',monospace;font-size:11px;letter-spacing:2px;margin-top:10px;transition:all .2s}
+  .sim-btn:hover{background:linear-gradient(135deg,#6d28d9,#8b5cf6);box-shadow:0 0 15px rgba(124,58,237,.4)}
+  .nodes-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin:14px 0}
+  .node-card{background:linear-gradient(145deg,#1a1f2e,#0d1117);border:1px solid #1e2d3d;border-radius:8px;padding:12px 8px;text-align:center;border-top-width:3px}
+  .node-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-bottom:6px}
+  .node-name{font-size:10px;color:#66fcf1;font-family:'Share Tech Mono',monospace;margin-bottom:2px;word-break:break-all}
+  .node-ip{font-size:10px;color:#5a6577}
+  .badge{display:inline-block;padding:2px 8px;border-radius:3px;font-size:10px;letter-spacing:1px;font-family:'Share Tech Mono',monospace;border:1px solid}
+  .badge-green{border-color:#ffffff;color:#ffffff;background:rgba(255,255,255,.08)}
+  .badge-red{border-color:#ff4b4b;color:#ff4b4b;background:#3b0d0d}
+  .badge-cyan{border-color:#66fcf1;color:#66fcf1;background:#0d2b3b}
+  .log-table{width:100%;border-collapse:collapse;font-size:12px;font-family:'Share Tech Mono',monospace}
+  .log-table th{background:#120024;color:#7c3aed;text-transform:uppercase;letter-spacing:1px;padding:8px 10px;border:1px solid #2d014d;text-align:left;font-size:11px}
+  .log-table td{padding:7px 10px;border-bottom:1px solid #1a0033;color:#c5c6c7;vertical-align:middle}
+  .log-table tr:hover td{background:rgba(45,1,77,.3)}
+  .stat-value{font-size:38px;font-weight:900;font-family:'Orbitron',monospace;color:#66fcf1;line-height:1}
+  .stat-label{font-size:11px;color:#5a6577;text-transform:uppercase;letter-spacing:2px;margin-top:6px}
+  .intel-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+  .intel-card{background:linear-gradient(145deg,#1a1f2e,#0d1117);border:1px solid #1e2d3d;border-radius:10px;padding:16px;text-align:center}
+  .chart-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0}
+  .chart-box{background:linear-gradient(145deg,#1a1f2e,#0d1117);border:1px solid #1e2d3d;border-radius:10px;padding:16px}
+  .member-card{background:linear-gradient(145deg,#1a1f2e,#0d1117);border:1px solid #1e2d3d;border-radius:10px;padding:20px;margin:10px 0}
+  .member-avatar{width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,#5b21b6,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:20px;font-family:'Orbitron',monospace;color:#fff;font-weight:900;flex-shrink:0}
+  .perm-badge{display:inline-block;padding:3px 10px;border-radius:3px;font-size:10px;letter-spacing:1px;font-family:'Share Tech Mono',monospace;border:1px solid #66fcf1;color:#66fcf1;background:#0d2b3b;margin:2px 3px 2px 0}
+  input[type=text],input[type=password]{background:#0d1117;border:1px solid #2d014d;border-radius:6px;color:#c5c6c7;padding:10px 14px;width:100%;font-family:'Rajdhani',sans-serif;font-size:14px;outline:none;margin-bottom:12px}
+  input[type=text]:focus,input[type=password]:focus{border-color:#7c3aed}
+  .login-wrap{max-width:400px;margin:40px auto 0;padding:30px;background:linear-gradient(145deg,#1a1f2e,#0d1117);border:1px solid #2d014d;border-radius:12px}
+  .login-title{text-align:center;font-family:'Orbitron',monospace;font-size:24px;color:#66fcf1;letter-spacing:3px;margin-bottom:6px}
+  .login-sub{text-align:center;color:#5a6577;font-size:12px;letter-spacing:4px;text-transform:uppercase;margin-bottom:24px}
+  .auth-btn{background:linear-gradient(135deg,#5b21b6,#7c3aed);color:#fff;border:1px solid #7c3aed;border-radius:6px;padding:12px;width:100%;cursor:pointer;font-family:'Orbitron',monospace;font-size:13px;letter-spacing:3px;font-weight:700;transition:all .3s;margin-top:6px}
+  .auth-btn:hover{background:linear-gradient(135deg,#6d28d9,#8b5cf6);box-shadow:0 0 20px rgba(124,58,237,.5)}
+  .login-label{color:#8892a0;font-size:11px;letter-spacing:2px;text-transform:uppercase;margin-bottom:4px;display:block;font-weight:600}
+  .error-msg{color:#ff4b4b;font-size:12px;text-align:center;margin-top:8px;padding:8px;background:#3b0d0d;border:1px solid #ff4b4b;border-radius:4px}
+  #toast{position:fixed;top:20px;right:20px;background:#120024;border:1px solid #7c3aed;border-radius:8px;padding:12px 18px;color:#66fcf1;font-family:'Share Tech Mono',monospace;font-size:12px;z-index:999;display:none;max-width:300px}
+  .geo-map{background:#0a0015;border:1px solid #2d014d;border-radius:10px;padding:16px;position:relative;overflow:hidden;height:280px;margin:14px 0}
+  .map-svg{width:100%;height:100%}
+  .map-label{font-family:'Share Tech Mono',monospace;font-size:9px;fill:#5a6577}
+  .pulse{animation:pulse 2s infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+  .block-pulse{animation:blockpulse 2s infinite}
+  @keyframes blockpulse{0%,100%{box-shadow:0 0 0 0 rgba(255,255,255,.3)}70%{box-shadow:0 0 0 8px rgba(255,255,255,0)}}
+  .sidebar-info{color:#a0a0a0;font-style:italic;font-size:12px;line-height:1.5;margin:8px 0}
+  .session-time{text-align:center;color:#333;font-size:10px;padding:8px 0}
+</style>
+
+<div id="toast"></div>
+
+<div id="login-screen" style="background:linear-gradient(135deg,#0a0e17,#111927,#0d1117);min-height:100vh;padding:40px 20px">
+  <div style="text-align:center;margin-bottom:30px">
+    <div style="font-family:'Orbitron',monospace;font-size:12px;color:#5a6577;letter-spacing:6px;text-transform:uppercase">Network Security Platform</div>
+    <div style="height:1px;background:linear-gradient(90deg,transparent,#66fcf1,transparent);width:60%;margin:12px auto"></div>
+  </div>
+  <div class="login-wrap">
+    <div class="login-title">CYBER VAULT</div>
+    <div class="login-sub">Authentication Required</div>
+    <div style="height:1px;background:linear-gradient(90deg,transparent,#66fcf1,transparent);margin:0 auto 24px;width:80%"></div>
+    <label class="login-label">Operator ID</label>
+    <input type="text" id="login-user" placeholder="Enter username" />
+    <label class="login-label">Access Key</label>
+    <input type="password" id="login-pass" placeholder="Enter password" />
+    <button class="auth-btn" onclick="doLogin()">AUTHENTICATE</button>
+    <div id="login-error" style="display:none" class="error-msg">ACCESS DENIED — Invalid credentials</div>
+    <div style="font-size:11px;color:#333;text-align:center;margin-top:16px">Demo: admin / admin123</div>
+  </div>
+  <div style="text-align:center;margin-top:50px;color:#333;font-size:11px">CIC Platform v2.0 — Secured by Ethereum Blockchain</div>
+</div>
+
+<div id="app" style="display:none">
+  <div id="sidebar">
+    <div class="brand">
+      <div class="brand-title">CYBER VAULT</div>
+      <div class="brand-role" id="sidebar-role">ANALYST</div>
+    </div>
+    <div class="nav-item active" onclick="navigate('dashboard')">The Analyst Dashboard</div>
+    <div class="nav-item" onclick="navigate('admin')">Administration Members</div>
+    <div class="nav-item" onclick="navigate('intel')">Intelligence Report</div>
+    <div class="nav-divider"></div>
+    <div class="sidebar-info">"Trust layer: ensuring data integrity and automatically mitigating attacks."</div>
+    <div class="nav-divider"></div>
+    <div style="margin-bottom:8px">
+      <div style="font-size:12px;font-weight:600;color:#c5c6c7;margin-bottom:6px">Threat Level</div>
+      <div id="threat-badge" class="threat-badge" style="background:#0a0015;color:#fff;border-color:#fff">LEVEL 5: STABLE</div>
+    </div>
+    <div style="margin-bottom:8px">
+      <div style="font-size:12px;font-weight:600;color:#c5c6c7;margin-bottom:4px">System Status</div>
+      <div style="background:#0d2b1a;color:#00ff41;border:1px solid #00ff41;border-radius:4px;padding:4px 10px;font-size:11px;text-align:center">System Operational</div>
+    </div>
+    <div style="margin-bottom:10px">
+      <div style="font-size:12px;font-weight:600;color:#c5c6c7;margin-bottom:4px">Blockchain</div>
+      <div style="background:#0d1b2b;color:#66fcf1;border:1px solid #1e4060;border-radius:4px;padding:4px 10px;font-size:11px;text-align:center">Connected (Simulated)</div>
+    </div>
+    <button class="sim-btn" onclick="simulateAttack()">SIMULATE ATTACK</button>
+    <div style="margin-top:auto"></div>
+    <div class="nav-divider"></div>
+    <button class="logout-btn" onclick="doLogout()">Logout</button>
+    <div class="session-time" id="session-time"></div>
+  </div>
+
+  <div id="main">
+    <div id="page-dashboard" class="page active">
+      <h2>The Analyst Dashboard</h2>
+      <div class="vault-line"></div>
+
+      <div class="metrics-row">
+        <div class="metric-box">
+          <div style="font-size:13px;color:#888;margin-bottom:8px">System Health Monitor</div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #444;padding:5px 0">
+            <span style="color:#888;font-size:12px">System Integrity</span>
+            <span id="integrity-pct" style="color:#fff;font-weight:700;font-size:12px">100%</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;border-bottom:1px solid #444;padding:5px 0">
+            <span style="color:#888;font-size:12px">Threat Condition</span>
+            <span id="threat-cond" style="color:#fff;font-size:12px">NORMAL</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;padding:5px 0">
+            <span style="color:#888;font-size:12px">Active Nodes</span>
+            <span style="color:#fff;font-size:12px">6 / 6 Online</span>
+          </div>
+        </div>
+        <div class="metric-box" style="text-align:center">
+          <div style="font-size:13px;color:#888;margin-bottom:8px">ROI & Prevention</div>
+          <div id="roi-value" style="font-size:30px;color:#fff;font-family:'Courier New',monospace;font-weight:700">$0.00</div>
+          <div style="color:#666;font-size:11px;margin-top:4px;text-transform:uppercase;letter-spacing:1px">Estimated value preserved</div>
+          <div style="margin-top:8px;font-size:13px;color:#fff"><span id="total-attacks-roi" style="font-weight:700;color:#fff">0</span> Intrusions Neutralized</div>
+        </div>
+        <div class="metric-box">
+          <div style="font-size:13px;color:#888;margin-bottom:8px">Blockchain Verification</div>
+          <div style="margin-bottom:6px">
+            <span class="badge badge-green" style="margin-right:4px">CONTRACT ACTIVE</span>
+            <span class="badge badge-green">IMMUTABLE</span>
+          </div>
+          <div style="font-size:10px;color:#888;margin-bottom:4px">Latest Block Hash:</div>
+          <div id="block-hash-display" class="block-pulse" style="font-family:'Courier New',monospace;color:#ddd;background:#000;padding:7px;border-radius:3px;font-size:9px;border-left:3px solid #fff;word-break:break-all">Waiting for transactions...</div>
+        </div>
+      </div>
+
+      <h3>Live Sensor Network</h3>
+      <div class="nodes-grid" id="nodes-grid"></div>
+
+      <h3 style="margin-top:16px">Live Mitigation Logs</h3>
+      <div style="overflow-x:auto">
+        <table class="log-table">
+          <thead><tr>
+            <th>Timestamp</th><th>Attack Type</th><th>Attacker IP</th><th>Target Sensor</th><th>Action</th><th>Gas Used</th><th>Block Hash</th>
+          </tr></thead>
+          <tbody id="log-tbody">
+            <tr><td colspan="7" style="text-align:center;color:#5a6577;padding:20px">No attacks detected. Click "Simulate Attack" to begin.</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:16px">
+        <h3>Geospatial Threat Tracking — Algiers</h3>
+        <div class="vault-line"></div>
+        <div class="geo-map">
+          <svg class="map-svg" id="geo-svg" viewBox="0 0 600 260">
+            <rect width="600" height="260" fill="#050a12"/>
+            <text x="300" y="130" text-anchor="middle" fill="#1a2535" font-size="13" font-family="Rajdhani,sans-serif">Greater Algiers Metropolitan Area</text>
+            <line x1="50" y1="50" x2="550" y2="50" stroke="#0d1f2d" stroke-width="1"/>
+            <line x1="50" y1="130" x2="550" y2="130" stroke="#0d1f2d" stroke-width="1"/>
+            <line x1="50" y1="210" x2="550" y2="210" stroke="#0d1f2d" stroke-width="1"/>
+            <line x1="150" y1="20" x2="150" y2="240" stroke="#0d1f2d" stroke-width="1"/>
+            <line x1="300" y1="20" x2="300" y2="240" stroke="#0d1f2d" stroke-width="1"/>
+            <line x1="450" y1="20" x2="450" y2="240" stroke="#0d1f2d" stroke-width="1"/>
+            <path d="M20,180 Q80,160 130,150 Q180,140 220,120 Q260,100 310,90 Q360,80 400,95 Q450,110 500,100 Q540,95 570,85" stroke="#1a3a5c" stroke-width="2" fill="none"/>
+            <text x="10" y="195" class="map-label">Mediterranean</text>
+            <g id="sensor-dots"></g>
+            <g id="attack-dots"></g>
+          </svg>
+          <div style="font-size:10px;color:#5a6577;margin-top:6px;font-family:'Share Tech Mono',monospace">
+            <span style="color:#00ff41">●</span> Safe nodes &nbsp;
+            <span style="color:#ff4b4b">●</span> Blocked/Attack points &nbsp;
+            Map centered on Algiers
+          </div>
+        </div>
+      </div>
+
+      <div style="text-align:center;color:#333;font-size:10px;margin-top:16px;padding-top:14px;border-top:1px solid #111">Supply Chain Guardian — Powered by Ethereum & Streamlit</div>
+    </div>
+
+    <div id="page-admin" class="page">
+      <h2>Administration Members</h2>
+      <div class="vault-line"></div>
+      <div id="members-list"></div>
+      <h3 style="margin-top:20px">Session Activity Log</h3>
+      <div class="vault-line"></div>
+      <div style="overflow-x:auto">
+        <table class="log-table" id="session-log-table">
+          <thead><tr><th>User</th><th>Role</th><th>Time</th><th>Action</th><th>Status</th></tr></thead>
+          <tbody id="session-log-tbody">
+            <tr><td colspan="5" style="text-align:center;color:#5a6577;padding:14px">No activity yet.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="page-intel" class="page">
+      <h2>Intelligence Report</h2>
+      <div class="vault-line"></div>
+      <div class="intel-grid" id="intel-stats"></div>
+      <div class="chart-row" id="chart-row">
+        <div class="chart-box">
+          <h3>Attack Type Distribution</h3>
+          <div style="position:relative;height:200px"><canvas id="type-pie" role="img" aria-label="Pie chart of attack types">Attack type distribution</canvas></div>
+          <div id="pie-legend" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:10px;font-size:11px"></div>
+        </div>
+        <div class="chart-box">
+          <h3>Targeted Sensors</h3>
+          <div style="position:relative;height:200px"><canvas id="target-bar" role="img" aria-label="Bar chart of targeted sensors">Sensor hit counts</canvas></div>
+        </div>
+      </div>
+      <h3>Complete Incident Log</h3>
+      <div style="overflow-x:auto">
+        <table class="log-table">
+          <thead><tr><th>Timestamp</th><th>Attack Type</th><th>Attacker IP</th><th>Target</th><th>Action</th><th>Gas Used</th><th>Block Hash</th></tr></thead>
+          <tbody id="intel-log-tbody">
+            <tr><td colspan="7" style="text-align:center;color:#5a6577;padding:20px">No attack data recorded yet. Use the Analyst Dashboard to simulate attacks.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script>
+const USERS = {
+  'ADMIN': {password:'admin123', role:'System Administrator', clearance:'LEVEL 5 — TOP SECRET', permissions:['VIEW_ALL','SIMULATE_ATTACKS','EXPORT_REPORTS','MANAGE_USERS']},
+  'ANALYST': {password:'analyst456', role:'Security Analyst', clearance:'LEVEL 3 — CONFIDENTIAL', permissions:['VIEW_DASHBOARD','SIMULATE_ATTACKS','EXPORT_REPORTS']},
+  'VIEWER': {password:'viewer789', role:'Read-Only Viewer', clearance:'LEVEL 1 — PUBLIC', permissions:['VIEW_DASHBOARD']}
+};
+
+const SENSORS = ['Pharma-Cold-01','Bio-Shipment-Alpha','Cryo-Unit-X7','Vaccine-Box-09','Medi-Transit-42','Organ-Care-Z1'];
+const SENSOR_META = {
+  'Pharma-Cold-01':{ip:'192.168.1.10',temp:'-18.3C',x:90,y:80},
+  'Bio-Shipment-Alpha':{ip:'192.168.1.11',temp:'-12.1C',x:180,y:110},
+  'Cryo-Unit-X7':{ip:'192.168.1.12',temp:'-22.5C',x:270,y:70},
+  'Vaccine-Box-09':{ip:'192.168.1.13',temp:'-15.7C',x:350,y:100},
+  'Medi-Transit-42':{ip:'192.168.1.14',temp:'-9.8C',x:430,y:75},
+  'Organ-Care-Z1':{ip:'192.168.1.15',temp:'-19.2C',x:510,y:105}
+};
+const ATTACK_TYPES = ['DoS Flood','Brute Force','SYN Flood','Port Scan','ARP Spoofing','MITM Attack'];
+const ATTACKER_POOLS = ['185.220.101.45','45.33.32.156','192.241.252.63','192.168.99.201','10.0.0.250','172.16.0.88','203.0.113.45','198.51.100.23','91.108.4.1','77.88.8.8'];
+const PIE_COLORS = ['#66fcf1','#45a29e','#ff4b4b','#eab308','#8b5cf6','#ff6b35'];
+
+let state = {
+  authenticated: false,
+  username: '',
+  loginTime: '',
+  attackLog: [],
+  sessionLog: [],
+  userLoginStatus: {},
+  pieChart: null,
+  barChart: null
+};
+
+function rndHash() {
+  return '0x' + Array.from({length:64},()=>'0123456789abcdef'[Math.floor(Math.random()*16)]).join('');
+}
+function fmt(ts) {
+  return ts.toLocaleString('en-GB',{hour12:false}).replace(',','');
+}
+function randomInt(a,b){return Math.floor(Math.random()*(b-a+1))+a}
+
+function doLogin() {
+  const u = document.getElementById('login-user').value.trim().toUpperCase();
+  const p = document.getElementById('login-pass').value;
+  if (USERS[u] && USERS[u].password === p) {
+    state.authenticated = true;
+    state.username = u;
+    state.loginTime = new Date().toLocaleString('en-GB',{hour12:false}).replace(',','');
+    state.userLoginStatus[u] = {loggedIn: true, time: state.loginTime};
+    state.sessionLog.push({user:u,role:USERS[u].role,time:state.loginTime,action:'LOGIN',status:'SUCCESS'});
+    document.getElementById('login-error').style.display='none';
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='flex';
+    document.getElementById('sidebar-role').textContent = USERS[u].role;
+    document.getElementById('session-time').textContent = 'Session: '+state.loginTime;
+    renderAll();
+  } else {
+    document.getElementById('login-error').style.display='block';
+    const t = new Date().toLocaleString('en-GB',{hour12:false}).replace(',','');
+    state.sessionLog.push({user:u||'unknown',role:'N/A',time:t,action:'LOGIN',status:'FAILED'});
+    renderSessionLog();
+  }
+}
+document.getElementById('login-pass').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
+document.getElementById('login-user').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('login-pass').focus(); });
+
+function doLogout() {
+  const t = new Date().toLocaleString('en-GB',{hour12:false}).replace(',','');
+  state.sessionLog.push({user:state.username,role:USERS[state.username].role,time:t,action:'LOGOUT',status:'SUCCESS'});
+  if(state.userLoginStatus[state.username]) state.userLoginStatus[state.username].loggedIn = false;
+  state.authenticated = false;
+  state.username = '';
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='block';
+  document.getElementById('login-user').value='';
+  document.getElementById('login-pass').value='';
+}
+
+function navigate(page) {
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  event.target.classList.add('active');
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  if(page==='intel') renderIntelCharts();
+  if(page==='admin') renderAdminMembers();
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.style.display='block';
+  setTimeout(()=>t.style.display='none', 3500);
+}
+
+function simulateAttack() {
+  const target = SENSORS[randomInt(0, SENSORS.length-1)];
+  const attackType = ATTACK_TYPES[randomInt(0, ATTACK_TYPES.length-1)];
+  const attackerIp = ATTACKER_POOLS[randomInt(0, ATTACKER_POOLS.length-1)];
+  const hash = rndHash();
+  const gas = randomInt(21000, 95000);
+  const meta = SENSOR_META[target];
+  const now = new Date();
+
+  const entry = {
+    timestamp: now,
+    attacker_ip: attackerIp,
+    target_ip: target,
+    attack_type: attackType,
+    block_hash: hash,
+    etherscan_link: 'https://etherscan.io/tx/'+hash,
+    mitigation_action: 'BLOCKED',
+    gas_used: gas,
+    x: meta.x + randomInt(-30,30),
+    y: meta.y + randomInt(-20,20)
+  };
+
+  state.attackLog.forEach(l => l.mitigation_action = 'SAFE');
+  state.attackLog.push(entry);
+  if(state.attackLog.length >= 2) {
+    state.attackLog[state.attackLog.length-2].mitigation_action = 'BLOCKED';
+  }
+
+  showToast('Mitigation Triggered! Blocked '+attackType+' from '+attackerIp);
+  renderAll();
+}
+
+function renderAll() {
+  renderThreatLevel();
+  renderMetrics();
+  renderNodes();
+  renderLogs();
+  renderGeoMap();
+  renderAdminMembers();
+  renderSessionLog();
+  renderIntelStats();
+  if(document.getElementById('page-intel').classList.contains('active')) renderIntelCharts();
+}
+
+function renderThreatLevel() {
+  const active = state.attackLog.filter(l=>l.mitigation_action==='BLOCKED').length;
+  const badge = document.getElementById('threat-badge');
+  if(active>=2){badge.style.background='#ef4444';badge.style.color='#fff';badge.style.borderColor='#ef4444';badge.textContent='LEVEL 1: ACTIVE ATTACK';}
+  else if(active===1){badge.style.background='#fff';badge.style.color='#000';badge.style.borderColor='#2d014d';badge.textContent='LEVEL 3: WARNING';}
+  else{badge.style.background='#0a0015';badge.style.color='#fff';badge.style.borderColor='#fff';badge.textContent='LEVEL 5: STABLE';}
+}
+
+function renderMetrics() {
+  const total = state.attackLog.length;
+  const active = state.attackLog.filter(l=>l.mitigation_action==='BLOCKED').length;
+  const score = 100 - active*20;
+  const roi = total*5000;
+  document.getElementById('integrity-pct').textContent = score+'%';
+  document.getElementById('integrity-pct').style.color = score>80?'#fff':'#ff4b4b';
+  document.getElementById('threat-cond').textContent = total>0?'ELEVATED':'NORMAL';
+  document.getElementById('roi-value').textContent = '$'+roi.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('total-attacks-roi').textContent = total;
+  const latest = state.attackLog.length>0 ? state.attackLog[state.attackLog.length-1].block_hash : 'Waiting for transactions...';
+  const hd = document.getElementById('block-hash-display');
+  if(state.attackLog.length>0) hd.textContent = latest.slice(0,22)+'...'+latest.slice(-10);
+  else hd.textContent = latest;
+}
+
+function renderNodes() {
+  const grid = document.getElementById('nodes-grid');
+  const blocked = new Set(state.attackLog.filter(l=>l.mitigation_action==='BLOCKED').map(l=>l.target_ip));
+  grid.innerHTML = SENSORS.map(s=>{
+    const meta = SENSOR_META[s];
+    const isBlocked = blocked.has(s);
+    const color = isBlocked?'#ff4b4b':'#ffffff';
+    const badge = isBlocked?'<span class="badge badge-red">BLOCKED</span>':'<span class="badge badge-green">SAFE</span>';
+    return `<div class="node-card" style="border-top-color:${color}">
+      <div class="node-dot" style="background:${color}"></div>
+      <div class="node-name">${s}</div>
+      <div class="node-ip">${meta.ip}</div>
+      <div class="node-ip">${meta.temp}</div>
+      <div style="margin-top:6px">${badge}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderLogs() {
+  const tbody = document.getElementById('log-tbody');
+  if(!state.attackLog.length){
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#5a6577;padding:20px">No attacks detected. Click "Simulate Attack" to begin.</td></tr>';
+    return;
+  }
+  const sorted = [...state.attackLog].reverse();
+  tbody.innerHTML = sorted.map(l=>{
+    const action = l.mitigation_action==='BLOCKED'
+      ? '<span class="badge badge-red">BLOCKED</span>'
+      : '<span class="badge badge-green">SAFE</span>';
+    return `<tr>
+      <td>${fmt(l.timestamp)}</td>
+      <td style="color:#66fcf1">${l.attack_type}</td>
+      <td style="color:#ff6b35">${l.attacker_ip}</td>
+      <td>${l.target_ip}</td>
+      <td>${action}</td>
+      <td>${l.gas_used.toLocaleString()}</td>
+      <td style="font-size:10px;color:#8892a0">${l.block_hash.slice(0,14)}...${l.block_hash.slice(-8)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderGeoMap() {
+  const sensorDots = document.getElementById('sensor-dots');
+  const attackDots = document.getElementById('attack-dots');
+  const blocked = new Set(state.attackLog.filter(l=>l.mitigation_action==='BLOCKED').map(l=>l.target_ip));
+
+  sensorDots.innerHTML = SENSORS.map(s=>{
+    const m = SENSOR_META[s];
+    const color = blocked.has(s)?'#ff4b4b':'#00ff41';
+    const pulse = blocked.has(s)?' class="pulse"':'';
+    return `<g${pulse}>
+      <circle cx="${m.x}" cy="${m.y}" r="7" fill="${color}" opacity="0.8"/>
+      <circle cx="${m.x}" cy="${m.y}" r="12" fill="${color}" opacity="0.15"/>
+      <text x="${m.x}" y="${m.y+22}" text-anchor="middle" class="map-label">${s.split('-')[0]}</text>
+    </g>`;
+  }).join('');
+
+  const recent = state.attackLog.filter(l=>l.mitigation_action==='BLOCKED');
+  attackDots.innerHTML = recent.map(l=>{
+    return `<g class="pulse">
+      <circle cx="${l.x}" cy="${l.y}" r="5" fill="#ff4b4b" opacity="0.7"/>
+      <circle cx="${l.x}" cy="${l.y}" r="10" fill="#ff4b4b" opacity="0.2"/>
+      <text x="${l.x}" y="${l.y-12}" text-anchor="middle" class="map-label" fill="#ff4b4b" font-size="8">${l.attack_type.split(' ')[0]}</text>
+    </g>`;
+  }).join('');
+}
+
+function renderAdminMembers() {
+  const list = document.getElementById('members-list');
+  list.innerHTML = Object.entries(USERS).map(([uname,info])=>{
+    const isOnline = state.userLoginStatus[uname]?.loggedIn;
+    const isCurrent = uname===state.username;
+    const loginTime = state.userLoginStatus[uname]?.time || 'Never';
+    const statusBadge = isCurrent
+      ? '<span class="badge badge-green">ONLINE (CURRENT)</span>'
+      : isOnline
+        ? '<span class="badge badge-cyan">SESSION ACTIVE</span>'
+        : '<span class="badge badge-red">OFFLINE</span>';
+    const borderColor = isCurrent?'#66fcf1':'#1e2d3d';
+    const perms = info.permissions.map(p=>`<span class="perm-badge">${p}</span>`).join('');
+    return `<div class="member-card" style="border-color:${borderColor}">
+      <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px">
+        <div class="member-avatar">${uname[0]}</div>
+        <div style="flex:1">
+          <div style="font-family:'Orbitron',monospace;font-size:15px;color:#66fcf1;letter-spacing:1px">${uname}</div>
+          <div style="color:#8892a0;font-size:12px">${info.role}</div>
+        </div>
+        <div>${statusBadge}</div>
+      </div>
+      <table style="width:100%;margin-bottom:10px">
+        <tr>
+          <td style="padding:5px 0;width:33%;vertical-align:top">
+            <div style="font-size:11px;color:#5a6577;text-transform:uppercase;letter-spacing:2px">Clearance</div>
+            <div style="color:#ff6b35;font-size:12px;font-family:monospace">${info.clearance}</div>
+          </td>
+          <td style="padding:5px 0;width:33%;vertical-align:top">
+            <div style="font-size:11px;color:#5a6577;text-transform:uppercase;letter-spacing:2px">Last Login</div>
+            <div style="color:#fff;font-size:12px;font-family:monospace">${loginTime}</div>
+          </td>
+          <td style="padding:5px 0;width:33%;vertical-align:top">
+            <div style="font-size:11px;color:#5a6577;text-transform:uppercase;letter-spacing:2px">Platform</div>
+            <div style="color:#fff;font-size:12px">CIC Security v2.0</div>
+          </td>
+        </tr>
+      </table>
+      <div style="font-size:11px;color:#5a6577;text-transform:uppercase;letter-spacing:2px;margin-bottom:6px">Permissions</div>
+      <div>${perms}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderSessionLog() {
+  const tbody = document.getElementById('session-log-tbody');
+  if(!state.sessionLog.length){
+    tbody.innerHTML='<tr><td colspan="5" style="text-align:center;color:#5a6577;padding:14px">No activity yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = [...state.sessionLog].reverse().map(l=>{
+    const s = l.status==='SUCCESS'
+      ? '<span class="badge badge-green">SUCCESS</span>'
+      : '<span class="badge badge-red">FAILED</span>';
+    return `<tr><td>${l.user}</td><td>${l.role}</td><td>${l.time}</td><td>${l.action}</td><td>${s}</td></tr>`;
+  }).join('');
+}
+
+function renderIntelStats() {
+  const total = state.attackLog.length;
+  const score = Math.max(0, 100-total*2);
+  const types = [...new Set(state.attackLog.map(l=>l.attack_type))].length;
+  const ips = [...new Set(state.attackLog.map(l=>l.attacker_ip))].length;
+  const scoreColor = score>70?'#00ff41':'#ff4b4b';
+  document.getElementById('intel-stats').innerHTML = `
+    <div class="intel-card"><div class="stat-value">${total}</div><div class="stat-label">Total Threats Blocked</div></div>
+    <div class="intel-card"><div class="stat-value">${types}</div><div class="stat-label">Attack Vectors</div></div>
+    <div class="intel-card"><div class="stat-value">${ips}</div><div class="stat-label">Unique Source IPs</div></div>
+    <div class="intel-card"><div class="stat-value" style="color:${scoreColor}">${score}%</div><div class="stat-label">System Integrity</div></div>
+  `;
+  const tbody = document.getElementById('intel-log-tbody');
+  if(!state.attackLog.length){
+    tbody.innerHTML='<tr><td colspan="7" style="text-align:center;color:#5a6577;padding:20px">No attack data recorded yet.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = [...state.attackLog].reverse().map(l=>{
+    const a = l.mitigation_action==='BLOCKED'
+      ? '<span class="badge badge-red">BLOCKED</span>'
+      : '<span class="badge badge-green">SAFE</span>';
+    return `<tr>
+      <td>${fmt(l.timestamp)}</td>
+      <td style="color:#66fcf1">${l.attack_type}</td>
+      <td style="color:#ff6b35">${l.attacker_ip}</td>
+      <td>${l.target_ip}</td>
+      <td>${a}</td>
+      <td>${l.gas_used.toLocaleString()}</td>
+      <td style="font-size:10px;color:#8892a0">${l.block_hash.slice(0,14)}...${l.block_hash.slice(-8)}</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderIntelCharts() {
+  if(!state.attackLog.length) return;
+  const typeCounts = {};
+  state.attackLog.forEach(l=>typeCounts[l.attack_type]=(typeCounts[l.attack_type]||0)+1);
+  const typeLabels = Object.keys(typeCounts);
+  const typeData = typeLabels.map(k=>typeCounts[k]);
+
+  if(state.pieChart) state.pieChart.destroy();
+  state.pieChart = new Chart(document.getElementById('type-pie'),{
+    type:'doughnut',
+    data:{labels:typeLabels,datasets:[{data:typeData,backgroundColor:PIE_COLORS.slice(0,typeLabels.length),borderWidth:0}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'55%',plugins:{legend:{display:false}}}
+  });
+  const legend = document.getElementById('pie-legend');
+  legend.innerHTML = typeLabels.map((l,i)=>`<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${PIE_COLORS[i]};display:inline-block"></span><span style="color:#8892a0">${l} (${typeData[i]})</span></span>`).join('');
+
+  const sensorCounts = {};
+  state.attackLog.forEach(l=>sensorCounts[l.target_ip]=(sensorCounts[l.target_ip]||0)+1);
+  const sLabels = Object.keys(sensorCounts).map(s=>s.split('-')[0]);
+  const sData = Object.values(sensorCounts);
+
+  if(state.barChart) state.barChart.destroy();
+  state.barChart = new Chart(document.getElementById('target-bar'),{
+    type:'bar',
+    data:{labels:sLabels,datasets:[{label:'Hits',data:sData,backgroundColor:'#66fcf1',borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{ticks:{color:'#8892a0',font:{size:10}},grid:{display:false}},y:{ticks:{color:'#8892a0',font:{size:10}},grid:{color:'rgba(255,255,255,.05)'},beginAtZero:true}}}
+  });
+}
+
+</script>

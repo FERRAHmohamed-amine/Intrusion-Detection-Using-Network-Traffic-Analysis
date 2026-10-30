@@ -1,0 +1,1 @@
+sudo nmap -T4 -p -A -oN nmap.text <ipaddr>
